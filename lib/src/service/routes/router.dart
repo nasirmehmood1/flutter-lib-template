@@ -13,7 +13,7 @@ class AppRouter {
   /// Returns the matched screen widget or a 404 fallback.
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case _ when _ == Routes.homeView.name:
+      case var r when r == Routes.homeView.name:
         return MaterialPageRoute(
           builder: (_) => const HomeView(),
           settings: settings,

@@ -16,15 +16,15 @@ class ApiEndpoints {
   // -------------------------------------------------------------------------
 
   /// Login endpoint.
-  static const String login = '$baseUrl/auth/login';
+  static final String login = '$baseUrl/auth/login';
 
   /// Register endpoint.
-  static const String register = '$baseUrl/auth/register';
+  static final String register = '$baseUrl/auth/register';
 
   // -------------------------------------------------------------------------
   // User Endpoints
   // -------------------------------------------------------------------------
 
   /// Fetch user profile.
-  static const String userProfile = '$baseUrl/user/profile';
+  static final String userProfile = '$baseUrl/user/profile';
 }
