@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../theme/app_colors.dart';
 
 /// Abstract base state class to reduce boilerplate in stateful screens.
 ///
@@ -17,30 +20,58 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 /// }
 /// ```
 abstract class BaseState<T extends StatefulWidget> extends State<T> {
-  /// Override this to provide the screen's main body content.
-  Widget buildBody(BuildContext context);
-
-  /// Optional: override to provide an [AppBar].
-  PreferredSizeWidget? buildAppBar(BuildContext context) => null;
-
-  /// Optional: override to provide a [FloatingActionButton].
-  Widget? buildFloatingActionButton(BuildContext context) => null;
-
-  /// Optional: override to provide a [BottomNavigationBar].
-  Widget? buildBottomNavigationBar(BuildContext context) => null;
+  Color _screenBackgroundColor = appWhiteColor;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(context),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: buildBody(context),
-        ),
-      ),
-      floatingActionButton: buildFloatingActionButton(context),
-      bottomNavigationBar: buildBottomNavigationBar(context),
+      backgroundColor: _screenBackgroundColor,
+      body: GestureDetector(
+          onTap: () {
+            if (Platform.isIOS && FocusScope.of(context).hasFocus) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            }
+          },
+          child: buildBody(context)),
+      drawer: appDrawer(context),
+      appBar: appBar(context),
+      bottomNavigationBar: appBottomNavigationBar(context),
+      floatingActionButton: floatingActionButton(context),
     );
   }
+
+  /// Abstract method for building the main body of the screen.
+  /// This method must be implemented by classes extending [BaseState].
+  Widget buildBody(BuildContext context);
+
+  /// Optional method for providing a [FloatingActionButton].
+  /// By default, returns `null` to indicate no floating action button.
+  FloatingActionButton? floatingActionButton(BuildContext context) {
+    return null;
+  }
+
+  /// Optional method for providing a `Drawer`.
+  /// By default, returns `null` to indicate no drawer.
+  Widget? appDrawer(BuildContext context) {
+    return null;
+  }
+
+  /// Optional method for providing a `BottomNavigationBar`.
+  /// By default, returns `null` to indicate no bottom navigation bar.
+  Widget? appBottomNavigationBar(BuildContext context) {
+    return null;
+  }
+
+  /// Optional method for providing an `AppBar`.
+  /// By default, returns `null` to indicate no app bar.
+  PreferredSizeWidget? appBar(BuildContext context) {
+    return null;
+  }
+
+  Color get screenBackgroundColor => _screenBackgroundColor;
+
+  set setScreenBackgroundColor(Color screenBackgroundColor) {
+    _screenBackgroundColor = screenBackgroundColor;
+  }
 }
+

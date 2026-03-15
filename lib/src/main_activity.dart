@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_general_template/src/service/navigation/router.dart';
+import 'package:flutter_general_template/src/utils/constants.dart' as AppConstants;
+import 'package:flutter_general_template/src/utils/constants.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'service/locator/locator.dart';
-import 'service/routes/router.dart';
 import 'theme/app_theme.dart';
-import 'utils/constants.dart';
 import 'utils/enums.dart';
 
 /// Root widget of the application.
@@ -17,21 +18,23 @@ class MainActivity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(375, 812),
-      minTextAdapt: true,
-      splitScreenMode: true,
-      builder: (BuildContext context, Widget? child) {
-        return MaterialApp(
-          title: AppConstants.appName,
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.system,
-          navigatorKey: navigationServiceInst.navigatorKey,
-          onGenerateRoute: AppRouter.generateRoute,
-          initialRoute: Routes.homeView.name,
-        );
-      },
+      designSize: const Size(430, 932),
+      minTextAdapt: false,
+      child: MaterialApp(
+        builder: (context, child) {
+          _setScreenDimensions();
+          return child ?? Container();
+        },
+        theme: lightThemeData(),
+        restorationScopeId: 'app',
+        navigatorKey: appNavigatorKey,
+        onGenerateRoute: navigationServiceInst.onGenerateRoute,
+      ),
     );
   }
+  void _setScreenDimensions() {
+    setScreenHeight = ScreenUtil().screenHeight;
+    setScreenWidth = ScreenUtil().screenWidth;
+  }
+
 }

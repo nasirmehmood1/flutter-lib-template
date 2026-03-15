@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_colors.dart' as AppColors;
 
 
 /// A reusable, styled button widget.
@@ -38,12 +39,12 @@ class CustomButton extends StatelessWidget {
         child: OutlinedButton(
           onPressed: isLoading ? null : onPressed,
           style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: AppColors.primary),
+            side:  BorderSide(color: AppColors.appPrimaryColor),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8.r),
             ),
           ),
-          child: _buildChild(AppColors.primary),
+          child: _buildChild(AppColors.appPrimaryColor),
         ),
       );
     }
@@ -54,13 +55,13 @@ class CustomButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.textOnPrimary,
+          backgroundColor: AppColors.appPrimaryColor,
+          foregroundColor: AppColors.appChartColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.r),
           ),
         ),
-        child: _buildChild(AppColors.textOnPrimary),
+        child: _buildChild(AppColors.appChartColor),
       ),
     );
   }

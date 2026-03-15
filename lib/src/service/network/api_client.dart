@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart' as client;
 
 import '../../models/api_model.dart';
 import '../../utils/constants.dart';
@@ -11,128 +12,129 @@ import '../../utils/constants.dart';
 ///
 /// Handles GET, POST, PUT, and DELETE operations with
 /// standardized error handling and response parsing.
+
 class ApiClient {
-  /// Variables
-  final http.Client _client = http.Client();
-  final Duration _timeout = const Duration(
-    seconds: AppConstants.defaultTimeout,
-  );
-
-  /// Headers
-  Map<String, String> _defaultHeaders({String? token}) {
-    final Map<String, String> headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
-    if (token != null) {
-      headers['Authorization'] = 'Bearer $token';
-    }
-    return headers;
-  }
-
-  // ---------------------------------------------------------------------------
-  // [ApiClient] methods
-  // ---------------------------------------------------------------------------
-
-  /// Performs a safe wrapper around HTTP requests with unified error handling.
-  Future<ApiModel> _safeRequest(Future<http.Response> Function() request) async {
+  Future<ApiModel> getRequest(
+      {required Uri uri, Map<String, String>? apiHeader}) async {
     try {
-      final http.Response response = await request().timeout(_timeout);
+      final response = await client.get(
+        uri,
+        headers: apiHeader ?? generalApiHeader,
+      );
       return _handleResponse(response);
-    } on SocketException {
-      return const ApiModel(
-        success: false,
-        message: 'No internet connection',
-      );
-    } on TimeoutException {
-      return const ApiModel(
-        success: false,
-        message: 'Request timed out',
-      );
+    } on SocketException catch (e) {
+      return defaultSocketErrorMap(e.message);
     } catch (e) {
-      return ApiModel(
-        success: false,
-        message: e.toString(),
-      );
+      return defaultServerErrorMap;
     }
   }
 
-  /// Performs a GET request to the given [uri].
-  Future<ApiModel> getRequest({
-    required Uri uri,
-    String? token,
-  }) {
-    return _safeRequest(() => _client.get(
-          uri,
-          headers: _defaultHeaders(token: token),
-        ));
-  }
-
-  /// Performs a POST request to the given [uri] with an optional [requestBody].
-  Future<ApiModel> postRequest({
-    required Uri uri,
-    Map<String, dynamic>? requestBody,
-    String? token,
-  }) {
-    return _safeRequest(() => _client.post(
-          uri,
-          headers: _defaultHeaders(token: token),
-          body: requestBody != null ? jsonEncode(requestBody) : null,
-        ));
-  }
-
-  /// Performs a PUT request to the given [uri] with an optional [requestBody].
-  Future<ApiModel> putRequest({
-    required Uri uri,
-    Map<String, dynamic>? requestBody,
-    String? token,
-  }) {
-    return _safeRequest(() => _client.put(
-          uri,
-          headers: _defaultHeaders(token: token),
-          body: requestBody != null ? jsonEncode(requestBody) : null,
-        ));
-  }
-
-  /// Performs a DELETE request to the given [uri].
-  Future<ApiModel> deleteRequest({
-    required Uri uri,
-    String? token,
-  }) {
-    return _safeRequest(() => _client.delete(
-          uri,
-          headers: _defaultHeaders(token: token),
-        ));
-  }
-
-  /// Parses the HTTP [response] into an [ApiModel].
-  ApiModel _handleResponse(http.Response response) {
-    dynamic body;
+  Future<ApiModel> deleteRequest(
+      {required Uri uri, Map<String, String>? apiHeader}) async {
     try {
-      body = jsonDecode(response.body);
-    } catch (_) {
-      body = response.body; // Fallback if response is not valid JSON
-    }
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return ApiModel(
-        success: true,
-        message: 'Success',
-        statusCode: response.statusCode,
-        data: body,
+      final response = await client.delete(
+        uri,
+        headers: apiHeader ?? generalApiHeader,
       );
+      return _handleResponse(response);
+    } on SocketException catch (e) {
+      return defaultSocketErrorMap(e.message);
+    } catch (e) {
+      return defaultServerErrorMap;
     }
-    
-    // Extract error message from API response if available
-    final String errorMessage = (body is Map && body.containsKey('message')) 
-        ? body['message'].toString() 
-        : 'Something went wrong';
+  }
 
-    return ApiModel(
-      success: false,
-      message: errorMessage,
-      statusCode: response.statusCode,
-      data: body,
-    );
+  Future<ApiModel> postRequest(
+      {required Uri uri,
+        required Map<String, dynamic> requestBody,
+        Map<String, String>? apiHeader}) async {
+    try {
+      final response = await client.post(
+        uri,
+        headers: apiHeader ?? generalApiHeader,
+        body: requestBody,
+      );
+      return _handleResponse(response);
+    } on SocketException catch (e) {
+      return defaultSocketErrorMap(e.message);
+    } catch (e) {
+      return defaultServerErrorMap;
+    }
+  }
+
+  Future<ApiModel> putRequest(
+      {required Uri uri,
+        required Map<String, dynamic> requestBody,
+        Map<String, String>? apiHeader}) async {
+    try {
+      final response = await client.put(
+        uri,
+        headers: apiHeader ?? generalApiHeader,
+        body: requestBody,
+      );
+      return _handleResponse(response);
+    } on SocketException catch (e) {
+      return defaultSocketErrorMap(e.message);
+    } catch (e) {
+      return defaultServerErrorMap;
+    }
+  }
+
+  Future<ApiModel> postMultiPartRequest({
+    required Uri uri,
+    required Map<String, dynamic> requestBody,
+    Map<String, String>? apiHeader,
+    required File file,
+  }) async {
+    try {
+      var request = client.MultipartRequest("POST", uri);
+
+      // Add all headers
+      request.headers.addAll(apiHeader ?? generalApiHeader);
+
+      // Add regular fields
+      requestBody.forEach((key, value) {
+        request.fields[key] = value.toString();
+      });
+
+      // Add file
+      // request.files.add(await client.MultipartFile.fromPath(
+      //   'files',
+      //   file.path,
+      //   contentType: getMediaType(fileUrl: file.path),
+      // ));
+
+      final streamedResponse = await request.send();
+      var response = await client.Response.fromStream(streamedResponse);
+      return _handleResponse(response);
+    } on SocketException catch (e) {
+      return defaultSocketErrorMap(e.message);
+    } catch (e) {
+      return defaultServerErrorMap;
+    }
+  }
+
+  _handleResponse(http.Response response) {
+    try {
+      Map<String, dynamic> responseBody = {};
+      if (response.body.isNotEmpty) {
+        responseBody = jsonDecode(response.body);
+      }
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return ApiModel(status: 200, message: 'OK', body: responseBody);
+      } else {
+        return ApiModel(
+          message: responseBody["message"] ??
+              responseBody["result"] ??
+              responseBody["error"] ??
+              generalApiError,
+        );
+      }
+    } catch (e) {
+      return defaultServerErrorMap;
+    }
   }
 }
+
+

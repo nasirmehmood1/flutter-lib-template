@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_colors.dart' as AppColors;
 
 
 /// A reusable loading indicator widget.
@@ -18,7 +19,7 @@ class LoadingIndicator extends StatelessWidget {
     return Center(
       child: CircularProgressIndicator(
         valueColor: AlwaysStoppedAnimation<Color>(
-          color ?? AppColors.primary,
+          color ?? AppColors.appPrimaryColor,
         ),
       ),
     );

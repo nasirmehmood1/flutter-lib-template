@@ -4,47 +4,26 @@ import 'package:equatable/equatable.dart';
 ///
 /// Used as a standardized return type for all [ApiClient] methods
 /// so that callers always receive a consistent response shape.
-class ApiModel extends Equatable {
-  /// Whether the API request was successful.
-  final bool success;
+class ApiModel {
+  int? _status;
+  String? _message;
+  Map<String, dynamic>? _body;
 
-  /// A human-readable message describing the result.
-  final String message;
+  ApiModel({int? status, String? message, Map<String, dynamic>? body})
+      : _status = status,
+        _message = message,
+        _body = body;
 
-  /// The HTTP status code of the response.
-  final int? statusCode;
+  int? get status => _status;
 
-  /// The response payload, if any.
-  final dynamic data;
+  String? get message => _message;
 
-  /// Creates an [ApiModel] instance.
-  const ApiModel({
-    required this.success,
-    required this.message,
-    this.statusCode,
-    this.data,
-  });
+  Map<String, dynamic>? get body => _body;
 
-  /// Creates an [ApiModel] from a JSON map.
-  factory ApiModel.fromJson(Map<String, dynamic> json) {
-    return ApiModel(
-      success: json['success'] as bool? ?? false,
-      message: json['message'] as String? ?? '',
-      statusCode: json['statusCode'] as int?,
-      data: json['data'],
-    );
-  }
+  set setStatus(int? status) => _status = status;
 
-  /// Converts this [ApiModel] to a JSON map.
-  Map<String, dynamic> toJson() {
-    return {
-      'success': success,
-      'message': message,
-      'statusCode': statusCode,
-      'data': data,
-    };
-  }
+  set setMessage(String? message) => _message = message;
 
-  @override
-  List<Object?> get props => [success, message, statusCode, data];
+  set setBody(Map<String, dynamic>? body) => _body = body;
 }
+

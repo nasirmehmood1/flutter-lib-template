@@ -1,7 +1,8 @@
+import 'package:flutter_general_template/src/modules/bottom_nav/bloc/bottom_nav_bloc.dart';
 import 'package:get_it/get_it.dart';
 
+import '../navigation/navigation_service.dart';
 import '../network/api_client.dart';
-import '../routes/navigation_service.dart';
 import '../local_storage/local_storage_service.dart';
 import '../../controller/local_storage_controller.dart';
 import '../../modules/home/bloc/home_bloc.dart';
@@ -49,4 +50,5 @@ void setupLocator() {
   serviceLocator.registerFactory<HomeBloc>(
     () => HomeBloc(),
   );
+  serviceLocator.registerFactory<BottomNavBloc>(() => BottomNavBloc());
 }
